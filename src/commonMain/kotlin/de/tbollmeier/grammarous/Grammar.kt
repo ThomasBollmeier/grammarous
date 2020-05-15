@@ -6,11 +6,11 @@ open class Grammar {
     private var transformations = mutableMapOf<String, AstTransformFn>()
     var startRuleName : String? = null
 
-    fun defineRule(name: String, parser: Parser) {
+    fun defineRule(name: String, vararg parsers: Parser) {
         if (rules.isEmpty()) {
             startRuleName = name
         }
-        rules[name] = parser
+        rules[name] = asSingle(parsers)
     }
 
     fun terminal(tokenType: String, id: String="") : Parser {
@@ -21,15 +21,15 @@ open class Grammar {
         return RuleParser(name, this, id)
     }
 
-    fun sequence(vararg parser: Parser) = SequenceParser(*parser)
+    fun sequence(vararg parsers: Parser) = SequenceParser(*parsers)
 
-    fun oneOf(vararg parser: Parser) = OneOfParser(*parser)
+    fun oneOf(vararg parsers: Parser) = OneOfParser(*parsers)
 
-    fun optional(parser: Parser) = MinMaxParser(parser, 0, 1)
+    fun optional(vararg parsers: Parser) = MinMaxParser(asSingle(parsers), 0, 1)
 
-    fun many(parser: Parser) = MinMaxParser(parser, 0)
+    fun many(vararg parsers: Parser) = MinMaxParser(asSingle(parsers), 0)
 
-    fun oneOrMore(parser: Parser) = MinMaxParser(parser, 1)
+    fun oneOrMore(vararg parsers: Parser) = MinMaxParser(asSingle(parsers), 1)
 
     fun transform(name: String, transformFn: AstTransformFn) {
         transformations[name] = transformFn
@@ -38,5 +38,12 @@ open class Grammar {
     fun getTransform(name: String) = transformations[name]
 
     fun getRule(name: String) = rules[name] ?: throw throw Exception("Undefined production rule $name")
+
+    private fun asSingle(parsers: Array<out Parser>) : Parser {
+        return if (parsers.size == 1)
+            parsers[0]
+        else
+            SequenceParser(*parsers)
+    }
 
 }

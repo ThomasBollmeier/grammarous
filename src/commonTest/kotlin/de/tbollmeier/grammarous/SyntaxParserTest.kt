@@ -6,21 +6,21 @@ class CalcGrammar : Grammar() {
 
     init {
 
-        defineRule("expr", sequence(
+        defineRule("expr",
             rule("term", "term"),
-            many(sequence(
+            many(
                 oneOf(
                     terminal("PLUS", "op"),
                     terminal("MINUS", "op")),
-                rule("term", "term")))))
+                rule("term", "term")))
 
-        defineRule("term", sequence(
+        defineRule("term",
             rule("factor", "fact"),
-            many(sequence(
+            many(
                 oneOf(
                     terminal("MULT", "op"),
                     terminal("DIV", "op")),
-                rule("factor", "fact")))))
+                rule("factor", "fact")))
 
         defineRule("factor", oneOf(
             terminal("IDENT"),
@@ -55,7 +55,7 @@ class SyntaxParserTest {
 
         val result = parser.parse(tokens)
 
-        assertTrue(result is Result.Success)
+        assertTrue(result is Result.Success, (result as? Result.Failure)?.message)
 
         val ast = result.value
 

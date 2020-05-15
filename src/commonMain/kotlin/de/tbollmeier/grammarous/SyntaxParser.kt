@@ -6,7 +6,14 @@ class SyntaxParser(private val grammar: Grammar) {
 
         if (grammar.startRuleName == null) return Result.Failure("No start rule defined")
 
-        return when (val parseResult = grammar.rule(grammar.startRuleName!!).parse(StreamBuffer(tokens))) {
+        val buffer = StreamBuffer(tokens)
+        val parseResult = grammar.rule(grammar.startRuleName!!).parse(buffer)
+
+        if (buffer.hasNext()) {
+            return Result.Failure("Unexpected token '${buffer.peek()?.lexeme}'")
+        }
+
+        return when (parseResult) {
             is Result.Success -> {
                 if (parseResult.value.size == 1) {
                     Result.Success(parseResult.value[0])
