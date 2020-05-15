@@ -1,6 +1,7 @@
 package de.tbollmeier.grammarous
 
 import kotlin.test.*
+import kotlin.time.measureTime
 
 class CalcGrammar : Grammar() {
 
@@ -22,6 +23,16 @@ class CalcGrammar : Grammar() {
                     terminal("DIV", "op")),
                 rule("factor", "fact")))
 
+        transform("term") {
+            ast -> if (ast.children.size == 1) {
+                val child = ast.children[0]
+                child.id = ""
+                child
+            } else {
+                ast
+            }
+        }
+
         defineRule("factor", oneOf(
             terminal("IDENT"),
             terminal("NUMBER"),
@@ -29,6 +40,14 @@ class CalcGrammar : Grammar() {
                 terminal("LPAR"),
                 rule("expr"),
                 terminal("RPAR"))))
+
+        transform("factor") {
+            ast -> if (ast.children.size == 1) {
+                ast.children[0]
+            } else {
+                ast.children[2]
+            }
+        }
 
     }
 
@@ -58,6 +77,8 @@ class SyntaxParserTest {
         assertTrue(result is Result.Success, (result as? Result.Failure)?.message)
 
         val ast = result.value
+
+        println(AstJsonFormatter().toJson(ast))
 
     }
 
