@@ -37,7 +37,7 @@ open class Grammar {
 
     fun getTransform(name: String) = transformations[name]
 
-    fun getRule(name: String) = rules[name] ?: throw throw Exception("Undefined production rule $name")
+    fun getRule(name: String) = rules[name] ?: throw Exception("Undefined production rule $name")
 
     private fun asSingle(parsers: Array<out Parser>) : Parser {
         return if (parsers.size == 1)
