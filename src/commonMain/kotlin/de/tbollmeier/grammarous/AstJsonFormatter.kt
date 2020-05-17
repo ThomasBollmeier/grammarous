@@ -29,6 +29,9 @@ class AstJsonFormatter : AstVisitor {
         writeLine("\"name\": \"${ast.name}\",")
         writeLine("\"value\": \"${ast.value}\",")
         writeLine("\"id\": \"${ast.id}\",")
+        for ((name, value) in ast.attrs.entries) {
+            writeLine("\"$name\": \"$value\",")
+        }
         writeLine("\"children\": [")
         firstChildInfo.add(true)
     }

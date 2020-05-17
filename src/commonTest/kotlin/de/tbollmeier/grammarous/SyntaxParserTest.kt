@@ -47,7 +47,7 @@ class CalcGrammar : Grammar() {
             val numOperators = (ast.children.size - 1) / 2
             var result = createBinOp(ast.children[1], ast.children[0], ast.children[2])
             for (i in 2..numOperators) {
-                var idx = 1 + 2 * (i - 1)
+                val idx = 1 + 2 * (i - 1)
                 result = createBinOp(ast.children[idx], result, ast.children[idx + 1])
             }
             return result
@@ -63,14 +63,8 @@ class CalcGrammar : Grammar() {
     }
 
     private fun createBinOp(op: Ast, left: Ast, right: Ast) : Ast {
-        val name = when (op.name) {
-            "PLUS" -> "sum"
-            "MINUS" -> "difference"
-            "MULT" -> "product"
-            "DIV" -> "quotient"
-            else -> throw Exception("Unknown operator ${op.name}")
-        }
-        val result = Ast(name)
+        val result = Ast("binop")
+        result.attrs["operator"] = op.value
         left.id = ""
         result.addChild(left)
         right.id = ""

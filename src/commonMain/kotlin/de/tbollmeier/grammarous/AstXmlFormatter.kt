@@ -19,13 +19,16 @@ class AstXmlFormatter : AstVisitor {
         if (ast.id.isNotEmpty()) {
             text += " id=\"${ast.id}\""
         }
+        for ((name, value) in ast.attrs.entries) {
+            text += " $name=\"$value\""
+        }
         text += if (ast.children.isEmpty() && ast.value.isEmpty()) {
             "/>"
         } else {
             ">"
         }
         if (ast.value.isNotEmpty()) {
-            text += "${ast.value}"
+            text += ast.value
         }
         if (ast.children.isEmpty()) {
             text += "</${ast.name}>"

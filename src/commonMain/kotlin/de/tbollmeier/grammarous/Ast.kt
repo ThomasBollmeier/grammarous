@@ -5,6 +5,8 @@ open class Ast(val name: String, val value: String = "", var id: String="") {
     var children = mutableListOf<Ast>()
         private set
 
+    val attrs = mutableMapOf<String, String>()
+
     fun accept(visitor: AstVisitor) {
         visitor.enter(this)
         children.forEach { it.accept(visitor) }
@@ -19,14 +21,14 @@ open class Ast(val name: String, val value: String = "", var id: String="") {
 
     fun getChildrenById(id: String) = children.filter { it.id == id }
 
-    fun moveChildrenByName(dest: Ast, name: String) = moveChildrenBy(dest) { it.name == name }
+    fun moveChildrenByName(sourceAst: Ast, name: String) = moveChildrenBy(sourceAst) { it.name == name }
 
-    fun moveChildrenById(dest: Ast, id: String) = moveChildrenBy(dest) { it.id == id }
+    fun moveChildrenById(sourceAst: Ast, id: String) = moveChildrenBy(sourceAst) { it.id == id }
 
-    private fun moveChildrenBy(dest: Ast, predicateFn: (Ast) -> Boolean) {
-        for (child in children.filter(predicateFn)) {
+    private fun moveChildrenBy(sourceAst: Ast, predicateFn: (Ast) -> Boolean) {
+        for (child in sourceAst.children.filter(predicateFn)) {
             child.id = ""
-            dest.addChild(child)
+            addChild(child)
         }
     }
 
