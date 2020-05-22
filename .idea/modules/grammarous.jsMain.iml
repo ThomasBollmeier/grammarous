@@ -2,22 +2,16 @@
 <module version="4">
   <component name="FacetManager">
     <facet type="kotlin-language" name="Kotlin">
-      <configuration version="3" platform="JavaScript " allPlatforms="JS []" useProjectSettings="false" isTestModule="true" externalProjectId="grammarous">
-        <dependsOnModuleNames>grammarous:commonTest</dependsOnModuleNames>
+      <configuration version="3" platform="JavaScript " allPlatforms="JS []" useProjectSettings="false" isTestModule="false" externalProjectId="grammarous">
+        <dependsOnModuleNames>grammarous:commonMain</dependsOnModuleNames>
         <sourceSets>
-          <sourceSet>grammarous.commonTest~1</sourceSet>
-          <sourceSet>grammarous.commonMain~1</sourceSet>
-          <sourceSet>grammarous.jsMain~1</sourceSet>
+          <sourceSet>grammarous.commonMain</sourceSet>
         </sourceSets>
         <newMppModelJpsModuleKind>COMPILATION_AND_SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
-        <externalSystemTestTasks>
-          <externalSystemTestTask>jsBrowserTest|grammarous:jsTest|js</externalSystemTestTask>
-          <externalSystemTestTask>jsNodeTest|grammarous:jsTest|js</externalSystemTestTask>
-        </externalSystemTestTasks>
-        <testOutputPath>$MODULE_DIR$/../../build/js/packages/grammarous-test/kotlin/grammarous-test.js</testOutputPath>
+        <productionOutputPath>$MODULE_DIR$/../../build/js/packages/grammarous/kotlin/grammarous.js</productionOutputPath>
         <compilerSettings />
         <compilerArguments>
-          <option name="outputFile" value="$MODULE_DIR$/../../build/js/packages/grammarous-test/kotlin/grammarous-test.js" />
+          <option name="outputFile" value="$MODULE_DIR$/../../build/js/packages/grammarous/kotlin/grammarous.js" />
           <option name="noStdlib" value="true" />
           <option name="sourceMap" value="true" />
           <option name="metaInfo" value="true" />

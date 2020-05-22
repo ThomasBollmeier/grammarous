@@ -5,9 +5,9 @@
       <configuration version="3" platform="JVM 1.6" allPlatforms="JVM [1.6]" useProjectSettings="false" isTestModule="true" externalProjectId="grammarous">
         <dependsOnModuleNames>grammarous:commonTest</dependsOnModuleNames>
         <sourceSets>
-          <sourceSet>grammarous.jvmMain~1</sourceSet>
-          <sourceSet>grammarous.commonTest~1</sourceSet>
-          <sourceSet>grammarous.commonMain~1</sourceSet>
+          <sourceSet>grammarous.commonTest</sourceSet>
+          <sourceSet>grammarous.commonMain</sourceSet>
+          <sourceSet>grammarous.jvmMain</sourceSet>
         </sourceSets>
         <newMppModelJpsModuleKind>COMPILATION_AND_SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
         <externalSystemTestTasks>jvmTest|grammarous:jvmTest|jvm</externalSystemTestTasks>

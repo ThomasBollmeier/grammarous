@@ -2,15 +2,12 @@
 <module version="4">
   <component name="FacetManager">
     <facet type="kotlin-language" name="Kotlin">
-      <configuration version="3" platform="Native " allPlatforms="Native []" useProjectSettings="false" isTestModule="true" externalProjectId="grammarous">
-        <dependsOnModuleNames>grammarous:commonTest</dependsOnModuleNames>
+      <configuration version="3" platform="Native " allPlatforms="Native []" useProjectSettings="false" isTestModule="false" externalProjectId="grammarous">
+        <dependsOnModuleNames>grammarous:commonMain</dependsOnModuleNames>
         <sourceSets>
-          <sourceSet>grammarous.mingwMain~1</sourceSet>
-          <sourceSet>grammarous.commonTest~1</sourceSet>
-          <sourceSet>grammarous.commonMain~1</sourceSet>
+          <sourceSet>grammarous.commonMain</sourceSet>
         </sourceSets>
         <newMppModelJpsModuleKind>COMPILATION_AND_SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
-        <externalSystemTestTasks>mingwTest|grammarous:mingwTest|mingw</externalSystemTestTasks>
         <compilerSettings />
         <compilerArguments>
           <option name="languageVersion" value="1.3" />
