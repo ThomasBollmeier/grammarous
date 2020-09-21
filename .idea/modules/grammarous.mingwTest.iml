@@ -5,9 +5,9 @@
       <configuration version="3" platform="Native (mingw_x64) " allPlatforms="Native []/Native [mingw_x64]" useProjectSettings="false" isTestModule="true" externalProjectId="grammarous">
         <dependsOnModuleNames>grammarous:commonTest</dependsOnModuleNames>
         <sourceSets>
+          <sourceSet>grammarous.commonTest</sourceSet>
           <sourceSet>grammarous.commonMain</sourceSet>
           <sourceSet>grammarous.mingwMain</sourceSet>
-          <sourceSet>grammarous.commonTest</sourceSet>
         </sourceSets>
         <newMppModelJpsModuleKind>COMPILATION_AND_SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
         <externalSystemTestTasks>

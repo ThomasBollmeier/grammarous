@@ -6,8 +6,8 @@
         <dependsOnModuleNames>grammarous:commonTest</dependsOnModuleNames>
         <sourceSets>
           <sourceSet>grammarous.jsMain</sourceSet>
-          <sourceSet>grammarous.commonMain</sourceSet>
           <sourceSet>grammarous.commonTest</sourceSet>
+          <sourceSet>grammarous.commonMain</sourceSet>
         </sourceSets>
         <newMppModelJpsModuleKind>COMPILATION_AND_SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
         <externalSystemTestTasks>
