@@ -49,9 +49,7 @@ fun createCalcGrammar(): Grammar {
                 }
                 rule("term")
             }
-        }
-
-        transform("expr", ::transformOperations)
+        } transformBy ::transformOperations
 
         ruleDef("term") {
             rule("factor")
@@ -62,9 +60,7 @@ fun createCalcGrammar(): Grammar {
                 }
                 rule("factor")
             }
-        }
-
-        transform("term", ::transformOperations)
+        } transformBy ::transformOperations
 
         ruleDef("factor") {
             oneOf {
@@ -76,9 +72,7 @@ fun createCalcGrammar(): Grammar {
                     terminal("RPAR")
                 }
             }
-        }
-
-        transform("factor", ::transformFactor)
+        } transformBy ::transformFactor
 
     }
 

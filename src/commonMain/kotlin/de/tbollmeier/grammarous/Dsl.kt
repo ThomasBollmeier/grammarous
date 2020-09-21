@@ -10,10 +10,11 @@ fun grammar(block: GrammarBuilder.() -> Unit): Grammar {
 
 class GrammarBuilder(private val grammar: Grammar) {
 
-    fun ruleDef(name: String, block: RuleBuilder.() -> Unit) {
+    fun ruleDef(name: String, block: RuleBuilder.() -> Unit) : Rule {
         val ruleBuilder = RuleBuilder(grammar)
         ruleBuilder.block()
         grammar.defineRule(name, *ruleBuilder.getParsers().toTypedArray())
+        return Rule(grammar, name)
     }
 
     fun transform(name: String, transformFn: AstTransformFn) {
@@ -52,4 +53,10 @@ class RuleBuilder(private val grammar: Grammar) {
     }
 
     fun getParsers(): List<Parser> = parsers
+}
+
+class Rule(private val grammar: Grammar, private val name: String) {
+    infix fun transformBy(transformFn: AstTransformFn) {
+        grammar.transform(name, transformFn)
+    }
 }
