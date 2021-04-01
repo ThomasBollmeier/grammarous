@@ -11,9 +11,13 @@ class StringCharStreamTest {
         var actual = ""
         val cut = createStringCharStream(expected)
 
-        while (cut.hasNext()) {
+        while (true) {
             val ch = cut.next()
-            actual += ch
+            if (ch != null) {
+                actual += ch
+            } else {
+                break
+            }
         }
 
         assertEquals(expected, actual)

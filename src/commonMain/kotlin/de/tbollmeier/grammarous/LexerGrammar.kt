@@ -1,41 +1,61 @@
 package de.tbollmeier.grammarous
 
 class LexerGrammar(
-        private val caseSensitive: Boolean,
-        private val whiteSpace: Set<Char>
+        val caseSensitive: Boolean,
+        val whiteSpace: Set<Char>
 ) {
-    private val tokenTypes = mutableListOf<TokenType>()
-    private val stringTypes = mutableListOf<StringType>()
-    private val commentTypes = mutableListOf<CommentType>()
+    private val _keywordTypes = mutableMapOf<String, String>()
+    private val _tokenTypes = mutableListOf<TokenType>()
+    private val _stringTypes = mutableListOf<StringType>()
+    private val _commentTypes = mutableListOf<CommentType>()
 
-    fun defineToken(name: String, pattern: String) {
-        tokenTypes.add(TokenType(name, Regex(pattern)))
+    val keywordTypes: Map<String, String>
+        get() = _keywordTypes
+    val tokenTypes: List<TokenType>
+        get() = _tokenTypes
+    val stringTypes: List<StringType>
+        get() = _stringTypes
+    val commentTypes: List<CommentType>
+        get() = _commentTypes
+
+    fun defineKeyword(content: String, name: String = "") {
+        val keywordName = if (name.isEmpty()) content.toUpperCase() else name
+        if (caseSensitive) {
+            _keywordTypes[content] = keywordName
+        } else {
+            _keywordTypes[content.toUpperCase()] = keywordName
+        }
     }
 
-    fun defineString(name: String, begin: String, end: String, escape: String) {
-        stringTypes.add(StringType(name, begin, end, escape))
+    fun defineToken(name: String, pattern: String) {
+        _tokenTypes.add(TokenType(name, Regex(pattern)))
     }
 
     fun defineComment(name: String, begin: String, end: String) {
-        commentTypes.add(CommentType(name, begin, end))
+        _commentTypes.add(CommentType(name, begin, end))
     }
 
-}
+    class KeywordType(
+        val name: String,
+        val content: String
+    )
 
-class TokenType(
+    class TokenType(
         val name: String,
         val regex: Regex
-)
+    )
 
-class StringType(
+    class StringType(
         val name: String,
         val begin: String,
         val end: String,
         val escape: String
-)
+    )
 
-class CommentType(
+    class CommentType(
         val name: String,
         val begin: String,
         val end: String,
-)
+    )
+
+}
