@@ -31,6 +31,10 @@ class LexerGrammar(
         _tokenTypes.add(TokenType(name, Regex(pattern)))
     }
 
+    fun defineString(name: String, begin: String, end: String, escape: String?=null) {
+        _stringTypes.add(StringType(name, begin, end, escape))
+    }
+
     fun defineComment(name: String, begin: String, end: String) {
         _commentTypes.add(CommentType(name, begin, end))
     }
@@ -49,7 +53,7 @@ class LexerGrammar(
         val name: String,
         val begin: String,
         val end: String,
-        val escape: String
+        val escape: String?
     )
 
     class CommentType(

@@ -18,36 +18,11 @@ class LexerImpl(private val grammar: LexerGrammar) : Lexer {
     ) : Stream<Token> {
 
         private var mode = Mode.NORMAL
+        private var curStringType: LexerGrammar.StringType? = null
+        private var curCommentType: LexerGrammar.CommentType? = null
         private var done = false
-        private var charBufSize = 1
-        private var charBuf = ""
-
-        init {
-
-            charBufSize = calcCharBufSize(grammar)
-
-        }
-
-        private fun calcCharBufSize(grammar: LexerGrammar): Int {
-
-            var ret = 0
-
-            for (st in grammar.stringTypes) {
-                var size = maxOf(st.begin.length, st.escape.length + st.end.length)
-                if (size > ret) {
-                    ret = size
-                }
-            }
-
-            for (ct in grammar.commentTypes) {
-                var size = maxOf(ct.begin.length, ct.end.length)
-                if (size > ret) {
-                    ret = size
-                }
-            }
-
-            return ret
-        }
+        private var tokens = mutableListOf<Token>()
+        private val dummySrcPos = SourcePosition(0, 0)
 
         override fun hasNext(): Boolean {
             return !done
@@ -55,18 +30,201 @@ class LexerImpl(private val grammar: LexerGrammar) : Lexer {
 
         override fun next(): Token? {
             return if (!done) {
-                val token = getNextToken()
-                if (token == null) {
+                var result: Token? = null
+                if (tokens.isEmpty()) {
+                    tokens.addAll(getNextTokens())
+                }
+                if (tokens.isNotEmpty()) {
+                    result = tokens[0]
+                    tokens.removeFirst()
+                } else {
                     done = true
                 }
-                token
+                result
             } else {
                 null
             }
         }
 
-        private fun getNextToken(): Token? {
+        private fun getNextTokens(): List<Token> {
+            while (!done) {
+                val tokens = when (mode) {
+                    Mode.NORMAL -> {
+                        val buffer = readNextChars()
+                        findTokens(buffer)
+                    }
+                    Mode.STRING -> readString()
+                    Mode.COMMENT -> skipComment()
+                }
+                if (tokens.isNotEmpty()) {
+                    return tokens
+                }
+            }
+            return emptyList()
+        }
+
+        private fun skipComment(): List<Token> {
+
+            var s = ""
+            val ct = curCommentType!!
+
+            while (!done) {
+
+                val ch = characters.next()
+                if (ch == null) {
+                    done = true
+                    break
+                }
+                s += ch
+
+                if (s.endsWith(ct.end)) {
+                    break
+                }
+
+            }
+
+            curCommentType = null
+            mode = Mode.NORMAL
+
+            return emptyList()
+        }
+
+        private fun readString(): List<Token> {
+
+            var s = ""
+            val st = curStringType!!
+
+            while (!done) {
+                val ch = characters.next()
+                if (ch == null) {
+                    done = true
+                    curStringType = null
+                    mode = Mode.NORMAL
+                    return emptyList()
+                }
+                s += ch
+
+                if (s.endsWith(st.end)) {
+                    if (st.escape != null) {
+                        val escapedEnd = st.escape + st.end
+                        if (!s.endsWith(escapedEnd)) {
+                            break
+                        }
+                    } else {
+                        break
+                    }
+                }
+            }
+
+            curStringType = null
+            mode = Mode.NORMAL
+
+            return listOf(Token(st.name, dummySrcPos, st.begin + s))
+        }
+
+        private fun findTokens(s: String): List<Token> {
+            return if (s.isNotEmpty()) {
+                return listOf(Token("TEXT", dummySrcPos, s))
+            } else {
+                emptyList()
+            }
+
+        }
+
+        private fun readNextChars(): String {
+
+            var ret = ""
+
+            val nonWSChar = skipWhiteSpace()
+
+            if (nonWSChar != null) {
+
+                ret += nonWSChar
+
+                val stringType = checkForChangeToStringMode(ret)
+                if (stringType != null) {
+                    ret = ret.dropLast(stringType.begin.length)
+                    mode = Mode.STRING
+                    curStringType = stringType
+                    return ret
+                }
+
+                val commentType = checkForChangeToCommentMode(ret)
+                if (commentType != null) {
+                    ret = ret.dropLast(commentType.begin.length)
+                    mode = Mode.COMMENT
+                    curCommentType = commentType
+                    return ret
+                }
+
+            } else {
+                return ret
+            }
+
+            while (!done) {
+
+                val ch = characters.next()
+
+                if (ch == null) {
+                    done = true
+                    break
+                }
+
+                if (ch in grammar.whiteSpace) {
+                    break
+                }
+
+                ret += ch
+
+                val stringType = checkForChangeToStringMode(ret)
+                if (stringType != null) {
+                    ret = ret.dropLast(stringType.begin.length)
+                    mode = Mode.STRING
+                    curStringType = stringType
+                    break
+                }
+
+                val commentType = checkForChangeToCommentMode(ret)
+                if (commentType != null) {
+                    ret = ret.dropLast(commentType.begin.length)
+                    mode = Mode.COMMENT
+                    curCommentType = commentType
+                    break
+                }
+
+            }
+
+            return ret
+        }
+
+        private fun checkForChangeToStringMode(s: String): LexerGrammar.StringType? {
+            for (st in grammar.stringTypes) {
+                if (s.endsWith(st.begin)) {
+                    return st
+                }
+            }
             return null
+        }
+
+        private fun checkForChangeToCommentMode(s: String): LexerGrammar.CommentType? {
+            for (ct in grammar.commentTypes) {
+                if (s.endsWith(ct.begin)) {
+                    return ct
+                }
+            }
+            return null
+        }
+
+        private fun skipWhiteSpace(): Char? {
+            do {
+                val ch = characters.next()
+                if (ch == null) {
+                    done = true
+                    return null
+                } else if (ch !in grammar.whiteSpace) {
+                    return ch
+                }
+            } while (true)
         }
 
     }
