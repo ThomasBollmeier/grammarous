@@ -81,26 +81,38 @@ fun createCalcGrammar(): Grammar {
 
 class DslTest {
 
+    private lateinit var lexer: Lexer
+
     @BeforeTest
     fun setUp() {
+
+        val lexerGrammar = LexerGrammar().apply {
+
+            defineToken("IDENT", "[a-z]+")
+            defineToken("NUMBER", "\\d+")
+
+            defineToken("PLUS", "\\+")
+            defineToken("MINUS", "-")
+            defineToken("MULT", "\\*")
+            defineToken("DIV", "/")
+            defineToken("LPAR", "\\(")
+            defineToken("RPAR", "\\)")
+
+        }
+
+        lexer = LexerFactory.createLexer(lexerGrammar)
+
     }
 
     @Test
     fun success() {
-
-        val pos = SourcePosition(1, 1)
-        val tokens = ListStream(listOf(
-            Token("NUMBER", pos, "1"),
-            Token("MINUS", pos, "-"),
-            Token("NUMBER", pos, "2"),
-            Token("PLUS", pos, "+"),
-            Token("NUMBER", pos, "3"),
-            Token("MULT", pos, "*"),
-            Token("IDENT", pos, "factor")))
+        
+        val code = "1 - ((2 + 3) * factor)"
+        val tokenStream = lexer.scan(createStringCharStream(code))
 
         val parser = SyntaxParser(createCalcGrammar())
 
-        val result = parser.parse(tokens)
+        val result = parser.parse(tokenStream)
 
         assertTrue(result is Result.Success, (result as? Result.Failure)?.message)
 

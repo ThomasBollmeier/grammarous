@@ -7,6 +7,8 @@
   <component name="SuppressABINotification">
     <option name="modulesWithSuppressedNotConfigured">
       <set>
+        <option value="grammarous" />
+        <option value="grammarous.jvmTest" />
         <option value="grammarous.mingwTest" />
       </set>
     </option>

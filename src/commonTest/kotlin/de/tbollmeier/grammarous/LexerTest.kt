@@ -10,8 +10,13 @@ class LexerTest {
     fun setUp() {
         val grammar = LexerGrammar(caseSensitive = false, whiteSpace = setOf(' ', '\t', '\n')).apply {
 
-            defineString("SINGLE_QUOTED", "'", "'", "\\")
-            defineComment("LINE_COMMENT", "//", "\n")
+            defineString("SINGLE_QUOTED_STR", "'", "'", "@")
+
+            defineComment("LINE_COMMENT", "--", "\n")
+
+            defineToken("ASSIGN", "<-")
+            defineToken("IDENT", "[a-z][a-z0-9_]*")
+            defineToken("NUMBER", "\\d+")
 
         }
 
@@ -22,17 +27,26 @@ class LexerTest {
     fun next() {
 
         val code = """
-            question = 'O\'Rly?'
-            answer = 42//a comment
+            question <- 'O@'Rly?'
+            answer <- 42 -- the answer to everything
         """.trimIndent()
 
         val charStream = createStringCharStream(code)
         val tokenStream = cut.scan(charStream)
 
+        var tokens = mutableListOf<Token>()
+
         while (true) {
-            val token = tokenStream.next() ?: break
-            println("${token.type}: ${token.lexeme}")
+            tokens.add(tokenStream.next() ?: break)
         }
+
+        assertEquals(6, tokens.size)
+        assertEquals("IDENT", tokens[0].type)
+        assertEquals("ASSIGN", tokens[1].type)
+        assertEquals("SINGLE_QUOTED_STR", tokens[2].type)
+        assertEquals("IDENT", tokens[3].type)
+        assertEquals("ASSIGN", tokens[4].type)
+        assertEquals("NUMBER", tokens[5].type)
 
     }
 

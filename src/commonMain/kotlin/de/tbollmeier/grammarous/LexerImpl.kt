@@ -25,7 +25,7 @@ class LexerImpl(private val grammar: LexerGrammar) : Lexer {
         private val dummySrcPos = SourcePosition(0, 0)
 
         override fun hasNext(): Boolean {
-            return !done
+            return !done || tokens.isNotEmpty()
         }
 
         override fun next(): Token? {
@@ -40,6 +40,10 @@ class LexerImpl(private val grammar: LexerGrammar) : Lexer {
                 } else {
                     done = true
                 }
+                result
+            } else if (tokens.isNotEmpty()) {
+                val result = tokens[0]
+                tokens.removeFirst()
                 result
             } else {
                 null
@@ -124,7 +128,36 @@ class LexerImpl(private val grammar: LexerGrammar) : Lexer {
 
         private fun findTokens(s: String): List<Token> {
             return if (s.isNotEmpty()) {
-                return listOf(Token("TEXT", dummySrcPos, s))
+
+                var tokens = mutableListOf<Token>()
+                var remaining = s
+
+                while (remaining.isNotEmpty()) {
+
+                    var maxTokenType: LexerGrammar.TokenType? = null
+                    var maxLexeme = ""
+
+                    for (tt in grammar.tokenTypes) {
+                        val matchResult = tt.regex.find(remaining)
+                        if (matchResult != null) {
+                            val lexeme = matchResult.value
+                            if (lexeme.length > maxLexeme.length) {
+                                maxTokenType = tt
+                                maxLexeme = lexeme
+                            }
+                        }
+                    }
+
+                    if (maxTokenType != null) {
+                        tokens.add(Token(maxTokenType.name, dummySrcPos, maxLexeme))
+                        remaining = remaining.drop(maxLexeme.length)
+                    } else {
+                        throw RuntimeException("No tokens found in \"$remaining\"")
+                    }
+
+                }
+
+                return tokens
             } else {
                 emptyList()
             }

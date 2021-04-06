@@ -1,16 +1,13 @@
 package de.tbollmeier.grammarous
 
 class LexerGrammar(
-        val caseSensitive: Boolean,
-        val whiteSpace: Set<Char>
+        val caseSensitive: Boolean = true,
+        val whiteSpace: Set<Char> = setOf(' ', '\t', '\n', '\r')
 ) {
-    private val _keywordTypes = mutableMapOf<String, String>()
     private val _tokenTypes = mutableListOf<TokenType>()
     private val _stringTypes = mutableListOf<StringType>()
     private val _commentTypes = mutableListOf<CommentType>()
 
-    val keywordTypes: Map<String, String>
-        get() = _keywordTypes
     val tokenTypes: List<TokenType>
         get() = _tokenTypes
     val stringTypes: List<StringType>
@@ -20,15 +17,29 @@ class LexerGrammar(
 
     fun defineKeyword(content: String, name: String = "") {
         val keywordName = if (name.isEmpty()) content.toUpperCase() else name
-        if (caseSensitive) {
-            _keywordTypes[content] = keywordName
+        val regex = if (caseSensitive) {
+            Regex("^$content")
         } else {
-            _keywordTypes[content.toUpperCase()] = keywordName
+            createCaseInsensitiveRegex(content)
         }
+        _tokenTypes.add(0, TokenType(keywordName, regex))
+    }
+
+    private fun createCaseInsensitiveRegex(content: String): Regex {
+
+        var pattern = "^"
+
+        for (ch in content) {
+            val lower = ch.toLowerCase()
+            val upper = ch.toUpperCase()
+            pattern += "($lower|$upper)"
+        }
+
+        return Regex(pattern)
     }
 
     fun defineToken(name: String, pattern: String) {
-        _tokenTypes.add(TokenType(name, Regex(pattern)))
+        _tokenTypes.add(TokenType(name, Regex("^$pattern")))
     }
 
     fun defineString(name: String, begin: String, end: String, escape: String?=null) {
@@ -38,11 +49,6 @@ class LexerGrammar(
     fun defineComment(name: String, begin: String, end: String) {
         _commentTypes.add(CommentType(name, begin, end))
     }
-
-    class KeywordType(
-        val name: String,
-        val content: String
-    )
 
     class TokenType(
         val name: String,
