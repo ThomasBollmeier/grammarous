@@ -20,7 +20,7 @@ class LexerTest {
 
         }
 
-        cut = LexerFactory.createLexer(grammar)
+        cut = createLexer(grammar)
     }
 
     @Test

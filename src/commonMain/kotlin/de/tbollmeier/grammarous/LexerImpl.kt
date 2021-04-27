@@ -1,6 +1,8 @@
 package de.tbollmeier.grammarous
 
-class LexerImpl(private val grammar: LexerGrammar) : Lexer {
+fun createLexer(grammar: LexerGrammar) : Lexer = LexerImpl(grammar)
+
+private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
 
     override fun scan(characters: Stream<Char>): Stream<Token> {
         return TokenStream(grammar, characters)

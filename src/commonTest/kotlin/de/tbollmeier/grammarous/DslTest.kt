@@ -100,7 +100,7 @@ class DslTest {
 
         }
 
-        lexer = LexerFactory.createLexer(lexerGrammar)
+        lexer = createLexer(lexerGrammar)
 
     }
 
