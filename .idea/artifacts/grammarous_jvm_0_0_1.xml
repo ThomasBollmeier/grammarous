@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="grammarous-jvm-0.0.1">
-    <output-path>C:\Users\thoma\git\grammarous\build\libs</output-path>
+    <output-path>C:/Users/thoma/git/grammarous/build/libs</output-path>
     <root id="archive" name="grammarous-jvm-0.0.1.jar" />
   </artifact>
 </component>
