@@ -122,4 +122,20 @@ class DslTest {
 
     }
 
+    @Test
+    fun error() {
+
+        val code = "1 - ((2 + 3) * some_factor)"
+        val tokenStream = lexer.scan(createStringCharStream(code))
+
+        val parser = SyntaxParser(createCalcGrammar())
+
+        val result = parser.parse(tokenStream)
+
+        assertTrue(result is Result.Failure)
+
+        println(result.message)
+
+    }
+
 }

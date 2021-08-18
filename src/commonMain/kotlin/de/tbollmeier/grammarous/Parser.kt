@@ -12,7 +12,11 @@ class TokenParser(private val tokenType: String,
 
     override fun parse(tokens: StreamBuffer<Token>): Result<List<Ast>> {
 
-        val token = tokens.peek()
+        val token = try {
+            tokens.peek()
+        } catch (e: RuntimeException) {
+            null
+        }
         return if (token != null) {
             if (token.type == tokenType) {
                 tokens.next()
@@ -24,7 +28,7 @@ class TokenParser(private val tokenType: String,
                 }
                 Result.Success(listOf(ast))
             } else {
-                Result.Failure("Unexpected token $tokenType")
+                Result.Failure("Unexpected token ${token.type}")
             }
         } else {
             Result.Failure("End of input")
