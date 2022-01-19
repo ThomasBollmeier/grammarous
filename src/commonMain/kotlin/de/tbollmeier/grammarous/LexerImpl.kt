@@ -14,17 +14,45 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
         COMMENT
     }
 
+    data class CharInfo(val char: Char, val sourcePos: SourcePosition)
+
+    class CharStreamWithPosInfo(private val charStream: Stream<Char>) {
+
+        private var line = 1
+        private var column = 1
+        private var lastPos: SourcePosition? = null
+
+        fun hasNext() = charStream.hasNext()
+
+        fun next(): CharInfo? {
+            val ch = charStream.next()
+            return if (ch != null) {
+                lastPos = SourcePosition(line, column)
+                when (ch) {
+                    '\n' -> {
+                        line++
+                        column = 1
+                    }
+                    else -> column++
+                }
+                CharInfo(ch, lastPos!!)
+            } else {
+                null
+            }
+        }
+    }
+
     class TokenStream(
         private val grammar: LexerGrammar,
-        private val characters: Stream<Char>
+        charStream: Stream<Char>
     ) : Stream<Token> {
 
+        private val characters = CharStreamWithPosInfo(charStream)
         private var mode = Mode.NORMAL
         private var curStringType: LexerGrammar.StringType? = null
         private var curCommentType: LexerGrammar.CommentType? = null
         private var done = false
         private var tokens = mutableListOf<Token>()
-        private val dummySrcPos = SourcePosition(0, 0)
 
         override fun hasNext(): Boolean {
             return !done || tokens.isNotEmpty()
@@ -76,12 +104,12 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
 
             while (!done) {
 
-                val ch = characters.next()
-                if (ch == null) {
+                val charInfo = characters.next()
+                if (charInfo == null) {
                     done = true
                     break
                 }
-                s += ch
+                s += charInfo.char
 
                 if (s.endsWith(ct.end)) {
                     break
@@ -98,17 +126,19 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
         private fun readString(): List<Token> {
 
             var s = ""
+            val positions = mutableListOf<SourcePosition>()
             val st = curStringType!!
 
             while (!done) {
-                val ch = characters.next()
-                if (ch == null) {
+                val charInfo = characters.next()
+                if (charInfo == null) {
                     done = true
                     curStringType = null
                     mode = Mode.NORMAL
                     return emptyList()
                 }
-                s += ch
+                s += charInfo.char
+                positions.add(charInfo.sourcePos)
 
                 if (s.endsWith(st.end)) {
                     if (st.escape != null) {
@@ -125,14 +155,21 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
             curStringType = null
             mode = Mode.NORMAL
 
-            return listOf(Token(st.name, dummySrcPos, st.begin + s))
+            val sourcePos = if (positions.isNotEmpty()) {
+                val (line, column) = positions[0]
+                SourcePosition(line, column - st.begin.length)
+            } else SourcePosition(0, 0)
+
+            return listOf(Token(st.name, sourcePos,st.begin + s))
         }
 
-        private fun findTokens(s: String): List<Token> {
-            return if (s.isNotEmpty()) {
+        private fun findTokens(buffer: List<CharInfo>): List<Token> {
 
-                var tokens = mutableListOf<Token>()
-                var remaining = s
+            return if (buffer.isNotEmpty()) {
+
+                val tokens = mutableListOf<Token>()
+                var remainingBuffer = buffer
+                var remaining = getString(remainingBuffer)
 
                 while (remaining.isNotEmpty()) {
 
@@ -151,8 +188,9 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
                     }
 
                     if (maxTokenType != null) {
-                        tokens.add(Token(maxTokenType.name, dummySrcPos, maxLexeme))
-                        remaining = remaining.drop(maxLexeme.length)
+                        tokens.add(Token(maxTokenType.name, remainingBuffer[0].sourcePos, maxLexeme))
+                        remainingBuffer = remainingBuffer.drop(maxLexeme.length)
+                        remaining = getString(remainingBuffer)
                     } else {
                         throw RuntimeException("No tokens found in \"$remaining\"")
                     }
@@ -166,30 +204,28 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
 
         }
 
-        private fun readNextChars(): String {
+        private fun readNextChars(): List<CharInfo> {
 
-            var ret = ""
+            val ret = mutableListOf<CharInfo>()
 
-            val nonWSChar = skipWhiteSpace()
+            val nonWSCharInfo = skipWhiteSpace()
 
-            if (nonWSChar != null) {
+            if (nonWSCharInfo != null) {
 
-                ret += nonWSChar
+                ret.add(nonWSCharInfo)
 
-                val stringType = checkForChangeToStringMode(ret)
+                val stringType = checkForChangeToStringMode(getString(ret))
                 if (stringType != null) {
-                    ret = ret.dropLast(stringType.begin.length)
                     mode = Mode.STRING
                     curStringType = stringType
-                    return ret
+                    return ret.dropLast(stringType.begin.length)
                 }
 
-                val commentType = checkForChangeToCommentMode(ret)
+                val commentType = checkForChangeToCommentMode(getString(ret))
                 if (commentType != null) {
-                    ret = ret.dropLast(commentType.begin.length)
                     mode = Mode.COMMENT
                     curCommentType = commentType
-                    return ret
+                    return ret.dropLast(commentType.begin.length)
                 }
 
             } else {
@@ -198,39 +234,40 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
 
             while (!done) {
 
-                val ch = characters.next()
+                val charInfo = characters.next()
 
-                if (ch == null) {
+                if (charInfo == null) {
                     done = true
                     break
                 }
 
-                if (ch in grammar.whiteSpace) {
+                if (charInfo.char in grammar.whiteSpace) {
                     break
                 }
 
-                ret += ch
+                ret.add(charInfo)
 
-                val stringType = checkForChangeToStringMode(ret)
+                val stringType = checkForChangeToStringMode(getString(ret))
                 if (stringType != null) {
-                    ret = ret.dropLast(stringType.begin.length)
                     mode = Mode.STRING
                     curStringType = stringType
-                    break
+                    return ret.dropLast(stringType.begin.length)
                 }
 
-                val commentType = checkForChangeToCommentMode(ret)
+                val commentType = checkForChangeToCommentMode(getString(ret))
                 if (commentType != null) {
-                    ret = ret.dropLast(commentType.begin.length)
                     mode = Mode.COMMENT
                     curCommentType = commentType
-                    break
+                    return ret.dropLast(commentType.begin.length)
                 }
 
             }
 
             return ret
         }
+
+        private fun getString(charInfoList: List<CharInfo>) =
+            charInfoList.map { it.char }.joinToString(separator = "")
 
         private fun checkForChangeToStringMode(s: String): LexerGrammar.StringType? {
             for (st in grammar.stringTypes) {
@@ -250,14 +287,11 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
             return null
         }
 
-        private fun skipWhiteSpace(): Char? {
+        private fun skipWhiteSpace(): CharInfo? {
             do {
-                val ch = characters.next()
-                if (ch == null) {
-                    done = true
-                    return null
-                } else if (ch !in grammar.whiteSpace) {
-                    return ch
+                val charInfo = characters.next() ?: return null
+                if (charInfo.char !in grammar.whiteSpace) {
+                    return charInfo
                 }
             } while (true)
         }

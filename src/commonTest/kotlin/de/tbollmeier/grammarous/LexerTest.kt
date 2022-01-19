@@ -34,7 +34,7 @@ class LexerTest {
         val charStream = createStringCharStream(code)
         val tokenStream = cut.scan(charStream)
 
-        var tokens = mutableListOf<Token>()
+        val tokens = mutableListOf<Token>()
 
         while (true) {
             tokens.add(tokenStream.next() ?: break)

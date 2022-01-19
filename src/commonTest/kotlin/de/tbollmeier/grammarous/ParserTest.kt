@@ -69,7 +69,7 @@ class ParserTest {
         assertTrue(parseResult is Result.Failure)
 
         val errorMessage = parseResult.message
-        assertEquals("Unexpected token IDENTIFIER", errorMessage)
+        assertEquals("Unexpected token INT", errorMessage)
 
         assertEquals(tokens[0], buffer.peek())
 
