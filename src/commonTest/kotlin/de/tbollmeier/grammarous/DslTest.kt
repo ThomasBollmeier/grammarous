@@ -74,6 +74,17 @@ fun createCalcGrammar(): Grammar {
             }
         } transformBy ::transformFactor
 
+        transform("IDENT") {
+            val ret = Ast("Identifier")
+            ret.attrs["name"] = it.value
+            return@transform ret
+        }
+
+        transform("NUMBER") {
+            val ret = Ast("Number")
+            ret.attrs["value"] = it.value
+            return@transform ret
+        }
     }
 
 }

@@ -30,7 +30,7 @@ class AstXmlFormatter : AstVisitor {
         if (ast.value.isNotEmpty()) {
             text += ast.value
         }
-        if (ast.children.isEmpty()) {
+        if (ast.children.isEmpty() && ast.value.isNotEmpty()) {
             text += "</${ast.name}>"
         }
         writeLine(text)
