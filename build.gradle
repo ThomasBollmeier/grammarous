@@ -5,7 +5,7 @@ repositories {
     mavenCentral()
 }
 group 'de.tbollmeier.grammarous'
-version '0.9.3'
+version '0.9.4'
 
 apply plugin: 'maven-publish'
 

@@ -192,7 +192,10 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
                         remainingBuffer = remainingBuffer.drop(maxLexeme.length)
                         remaining = getString(remainingBuffer)
                     } else {
-                        throw RuntimeException("No tokens found in \"$remaining\"")
+                        tokens.add(Token(ERROR_TOKEN, remainingBuffer[0].sourcePos, remaining))
+                        remainingBuffer = emptyList()
+                        remaining = ""
+                        done = true
                     }
 
                 }

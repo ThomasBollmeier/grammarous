@@ -40,6 +40,10 @@ fun createCalcGrammar(): Grammar {
 
     return grammar {
 
+        ruleDef("program") {
+            oneOrMore { rule("expr") }
+        }
+
         ruleDef("expr") {
             rule("term")
             many {
@@ -136,7 +140,10 @@ class DslTest {
     @Test
     fun error() {
 
-        val code = "1 - ((2 + 3) * some_factor)"
+        val code = """
+            1 - ((2 + 3) * factor)
+            42+invalid_name
+        """.trimIndent()
         val tokenStream = lexer.scan(createStringCharStream(code))
 
         val parser = SyntaxParser(createCalcGrammar())

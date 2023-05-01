@@ -39,6 +39,9 @@ class LexerGrammar(
     }
 
     fun defineToken(name: String, pattern: String) {
+        if (name == ERROR_TOKEN) {
+            throw RuntimeException("Token type 'ERROR_TOKEN' is reserved")
+        }
         _tokenTypes.add(TokenType(name, Regex("^$pattern")))
     }
 
