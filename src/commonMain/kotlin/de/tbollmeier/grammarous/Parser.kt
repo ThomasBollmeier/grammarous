@@ -20,12 +20,21 @@ class TokenParser(private val tokenType: String,
         return if (token != null) {
             if (token.type == tokenType) {
                 tokens.next()
-                var ast = Ast(tokenType, token.lexeme, id)
+                var ast = Ast(tokenType, token.lexeme, id,
+                    token.startPosition, token.endPosition)
+
                 val transformer = grammar.getTransform(tokenType)
                 if (transformer != null) {
+                    val start = ast.startPosition
+                    val end = ast.endPosition
+
                     ast = transformer.invoke(ast)
+
                     ast.id = id
+                    ast.startPosition = start
+                    ast.endPosition = end
                 }
+
                 Result.Success(listOf(ast))
             } else {
                 Result.Failure("Unexpected token ${token.type}")
@@ -154,13 +163,19 @@ class RuleParser(private val name: String,
         return when (val parseResult = parser.parse(tokens)) {
             is Result.Success -> {
                 var ast = Ast(name, "", id)
+                var start: SourcePosition? = null
+                var end: SourcePosition? = null
                 for (child in parseResult.value) {
                     ast.addChild(child)
+                    start = SourcePosition.first(start, child.startPosition)
+                    end = SourcePosition.last(end, child.endPosition)
                 }
                 if (transformer != null) {
                     ast = transformer.invoke(ast)
                     ast.id = id
                 }
+                ast.startPosition = start
+                ast.endPosition = end
                 Result.Success(listOf(ast))
             }
             is Result.Failure -> parseResult

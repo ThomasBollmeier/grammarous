@@ -121,8 +121,9 @@ class DslTest {
 
     @Test
     fun success() {
+        //          12345678901234567890123
+        val code = "1 - ((2 + 3) * factor )"
 
-        val code = "1 - ((2 + 3) * factor)"
         val tokenStream = lexer.scan(createStringCharStream(code))
 
         val parser = SyntaxParser(createCalcGrammar())

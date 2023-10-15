@@ -22,6 +22,14 @@ class AstXmlFormatter : AstVisitor {
         for ((name, value) in ast.attrs.entries) {
             text += " $name=\"$value\""
         }
+        if (ast.startPosition != null) {
+            val (line, column) = ast.startPosition!!
+            text += " start=($line, $column)"
+        }
+        if (ast.endPosition != null) {
+            val (line, column) = ast.endPosition!!
+            text += " end=($line, $column)"
+        }
         text += if (ast.children.isEmpty() && ast.value.isEmpty()) {
             "/>"
         } else {

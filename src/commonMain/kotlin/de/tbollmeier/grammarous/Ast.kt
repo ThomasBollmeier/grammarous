@@ -1,6 +1,11 @@
 package de.tbollmeier.grammarous
 
-open class Ast(val name: String, val value: String = "", var id: String="") {
+open class Ast(
+    val name: String,
+    val value: String = "",
+    var id: String="",
+    var startPosition: SourcePosition?=null,
+    var endPosition: SourcePosition?=null) {
 
     var children = mutableListOf<Ast>()
         private set

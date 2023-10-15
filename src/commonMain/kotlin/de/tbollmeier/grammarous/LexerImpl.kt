@@ -28,13 +28,9 @@ private class LexerImpl(private val grammar: LexerGrammar) : Lexer {
             val ch = charStream.next()
             return if (ch != null) {
                 lastPos = SourcePosition(line, column)
-                when (ch) {
-                    '\n' -> {
-                        line++
-                        column = 1
-                    }
-                    else -> column++
-                }
+                val pos = lastPos!!.advance(ch)
+                line = pos.line
+                column = pos.column
                 CharInfo(ch, lastPos!!)
             } else {
                 null
