@@ -26,6 +26,19 @@ class StreamBuffer<T>(private val stream: Stream<T>) {
         return if (idx < elements.size) elements[idx] else null
     }
 
+    fun peekMany(n: Int) : List<T> {
+        val ret = mutableListOf<T>()
+        updateBuffer(n - 1)
+        for (idx in curIdx until curIdx + n) {
+            if (idx >= elements.size) {
+                break
+            }
+            ret.add(elements[idx])
+        }
+
+        return ret
+    }
+
     fun startChange() {
         changes.add(curIdx)
     }

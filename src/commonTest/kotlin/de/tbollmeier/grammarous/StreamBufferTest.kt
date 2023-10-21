@@ -31,6 +31,15 @@ class StreamBufferTest {
     }
 
     @Test
+    fun peekMany() {
+        assertEquals(listOf(1, 2, 3), buffer.peekMany(3))
+        buffer.next()
+        buffer.next()
+        buffer.next()
+        assertEquals(listOf(4, 5), buffer.peekMany(3))
+    }
+
+    @Test
     fun change() {
         assertEquals(1, buffer.peek())
         buffer.next() // --> 1
